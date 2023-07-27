@@ -41,7 +41,7 @@
       </ul>
       {% if user.is_authenticated %}
       <span class="navbar-text mr-2">Hello, {{ user.first_name }}</span>
-      <a class="btn btn-danger my-2 my-sm-0" href=" ">Signout</a>
+      <a class="btn btn-danger my-2 my-sm-0" href="{% url 'djangoapp:logout' %}">Signout</a>
       {% else %}
       <form class="form-inline my-2 my-lg-0 ml-auto" action="{% url 'djangoapp:login' %}" method="post">
         {% csrf_token %}
