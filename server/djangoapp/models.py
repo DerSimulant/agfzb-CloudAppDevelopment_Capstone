@@ -31,15 +31,31 @@ class CarModel(models.Model):
 
 
 class CarDealer:
-    def __init__(self, id, name, city, state, zip, lat, long):
-        self.id = id
-        self.name = name
-        self.city = city
-        self.state = state
-        self.zip = zip
-        self.lat = lat
-        self.long = long
 
+    def __init__(self, address, city, full_name, id, lat, long, short_name, state, st, zip):
+        # Dealer address
+        self.address = address
+        # Dealer city
+        self.city = city
+        # Dealer Full Name
+        self.full_name = full_name
+        # Dealer id
+        self.id = id
+        # Location lat
+        self.lat = lat
+        # Location long
+        self.long = long
+        # Dealer short name
+        self.short_name = short_name
+        # Dealer state
+        self.state = state
+        self.st = st
+        # Dealer zip
+        self.zip = zip
+
+    def __str__(self):
+        return "Dealer name: " + self.full_name
+        
 class DealerReview:
     def __init__(self, id, dealership, name, purchase, purchase_date, car_make, car_model, car_year, review):
         self.id = id
