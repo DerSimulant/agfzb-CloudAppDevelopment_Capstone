@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
+
 # from .models import related models
 # from .restapis import related methods
 from django.contrib.auth import login, logout, authenticate
@@ -27,23 +29,46 @@ def contact(request):
     return render(request, 'djangoapp/contact.html')
 
 # Create a `login_request` view to handle sign in request
+# Define the login_request view
 def login_request(request):
+
+    # Check if the request method is POST
     if request.method == 'POST':
+        
+        # If it's a POST request, get the username and password from the request
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        
+        # Use Django's built-in authenticate function to check if the provided
+        # username and password correspond to a valid user
+        user = authenticate(username=username, password=password)
+
+        # If the user is valid (i.e., authenticate didn't return None),
         if user is not None:
+            
+            # Use Django's built-in login function to log the user in
             login(request, user)
-            return HttpResponseRedirect('/')
+            
+            # Redirect the user to the index page
+            # We use the reverse function to get the URL associated with the 'index' view
+            return HttpResponseRedirect(reverse('djangoapp:index'))
+        
+        # If the user is not valid (i.e., authenticate returned None),
         else:
-            return render(request, 'djangoapp/login.html', {'error': 'Invalid login'})
+            
+            # Render the login page again, but this time include an error message
+            return render(request, 'djangoapp/login.html',  {'error': 'Invalid login'})
+    
+    # If the request method is not POST (e.g., it's a GET request),
     else:
+        
+        # Render the login page without an error message
         return render(request, 'djangoapp/login.html')
 
 # Create a `logout_request` view to handle sign out request
 def logout_request(request):
     logout(request)
-    return HttpResponseRedirect('/') 
+    return redirect('djangoapp:index')
     
     # für Weiterleitung zu anderer Page: return HttpResponseRedirect(reverse('djangoapp:homepage'))
 
