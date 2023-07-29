@@ -1,14 +1,43 @@
-{% extends 'djangoapp/base.html' %}
-
-{% block title %}
-Dealership Review
-{% endblock %}
+{% extends "djangoapp/base.html" %}
+{% load static %}
 
 {% block content %}
-<!-- Add a dealer table here -->
-<h1>
-    Here is the starting POINT!
-</h1>
-<script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>
-<script src="https://unpkg.com/bootstrap-table@1.18.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+
+<div class="container">
+    <h1>Dealerships</h1>
+
+    <table class="table table-striped" id="table" data-filter-control="true" >
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Dealer Name</th>
+                <th>City</th>
+                <th>Address</th>
+                <th>Zip</th>
+                <th data-field="state" data-filter-control="select">State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealer in dealerships %}
+                <tr>
+                    <td>{{ dealer.id }}</td>
+                    <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{ dealer.full_name }}</a></td>
+
+                    <td>{{ dealer.city }}</td>
+                    <td>{{ dealer.address }}</td>
+                    <td>{{ dealer.zip }}</td>
+                    <td>{{ dealer.state }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No dealerships found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
 {% endblock %}
+
+
