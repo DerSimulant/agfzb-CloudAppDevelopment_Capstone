@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.css">
+
     <style> body {
         display: flex;
         flex-direction: column;
@@ -16,6 +18,9 @@
     .content {
         flex: 1;
     }
+    .bootstrap-table .fixed-table-loading {
+    display: none;
+}
  </style>    
     {% block header %}{% endblock %}
 </head>
@@ -69,5 +74,12 @@
           <span class="text-muted">© 2023 Dealership Review. All rights reserved. | <a href="{% url 'djangoapp:contact' %}">Contact Us</a></span>
         </div>
       </footer>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/bootstrap-table.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+    <script>
+        $(function() {
+            $('#table').bootstrapTable()
+        })
+    </script>
 </body>
 </html>
