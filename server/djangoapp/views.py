@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
@@ -11,6 +11,9 @@ from django.contrib import messages
 from datetime import datetime
 import logging
 import json
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, post_request
+
+from .models import CarModel
 
 
 # Get an instance of a logger
@@ -95,41 +98,54 @@ def get_dealerships(request):
         url = "https://eu-de.functions.appdomain.cloud/api/v1/web/5f6babc9-6519-4062-ac30-e2b3b37a1776/dealership-package/get-dealership.json"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        # Create a context to send the dealerships to the template
+        context = {"dealerships": dealerships}
+        # Use the render function to render index.html with the dealerships
+        return render(request, 'djangoapp/index.html', context)
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
     reviews = get_dealer_reviews_from_cf('https://eu-de.functions.appdomain.cloud/api/v1/web/5f6babc9-6519-4062-ac30-e2b3b37a1776/review-package/get-review.json', dealer_id, "9U8iLU_x5m6heGVVuQuAw1yiui3eqnyWIzDaE_HwMINe")
+    # Get reviews for the dealer
+    reviews = get_dealer_reviews_from_cf(url, dealer_id)
+    # Create a context to send to the template 
     context = {"reviews": reviews}
-    return HttpResponse(context)
+    # Render the dealer details with the list of reviews
+    return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
+
+
 def add_review(request, dealer_id):
-    if request.user.is_authenticated:
+    if request.method == "GET":
+        if request.user.is_authenticated:
+            cars = CarModel.objects.filter(dealer_id=dealer_id)
+            context = {"cars": cars, "dealer_id": dealer_id}
+            return render(request, 'djangoapp/add_review.html', context)
+        else:
+            return redirect('djangoapp:login')  # Redirects to the login page if the user is not authenticated
+    elif request.method == "POST":
         form = request.POST
         review = {}
         review["time"] = datetime.utcnow().isoformat()
         review["dealership"] = dealer_id
-        review["review"] = form.get('review')
+        review["review"] = form.get('content')
         review["name"] = request.user.username
-        review["purchase"] = form.get('purchase')
-        if form.get('purchase_date'):
-            review["purchase_date"] = form.get('purchase_date')
-        review["car_make"] = form.get('car_make')
-        review["car_model"] = form.get('car_model')
-        review["car_year"] = form.get('car_year')
+        review["purchase"] = form.get('purchasecheck')
+        if form.get('purchasedate'):
+            review["purchase_date"] = datetime.strptime(form.get('purchasedate'), "%m/%d/%Y").isoformat()
+        car = CarModel.objects.get(pk=form.get('car'))
+        review["car_make"] = car.car_make.name
+        review["car_model"] = car.name
+        review["car_year"] = car.year.strftime("%Y")
 
         json_payload = {}
         json_payload["review"] = review
 
-        url = 'your_cloud_function_url'  # Replace this with the URL of your cloud function
+        url = 'https://eu-de.functions.appdomain.cloud/api/v1/web/5f6babc9-6519-4062-ac30-e2b3b37a1776/review-package/post-review'  
         post_request(url, json_payload, dealerId=dealer_id)
-        return redirect('djangoapp:index')  # This redirects to the index page after a review is posted
-    else:
-        return redirect('djangoapp:login')  # Redirects to the login page if the user is not authenticated
+        return redirect('djangoapp:dealer_details', dealer_id=dealer_id)
+
 
 
